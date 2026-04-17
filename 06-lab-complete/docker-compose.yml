@@ -1,4 +1,4 @@
-version: "3.9"
+version: '3.8'
 
 services:
   agent:
@@ -6,28 +6,24 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - ENVIRONMENT=staging
-      - APP_NAME=Production AI Agent
       - REDIS_URL=redis://redis:6379/0
-    env_file:
-      - .env.local
+      - ENVIRONMENT=production
+      - AGENT_API_KEY=${AGENT_API_KEY:-secret-key-123}
     depends_on:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "python", "-c",
-             "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 15s
-    restart: unless-stopped
 
   redis:
     image: redis:7-alpine
-    command: redis-server --maxmemory 128mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
-      timeout: 3s
-      retries: 3
+      timeout: 5s
+      retries: 5

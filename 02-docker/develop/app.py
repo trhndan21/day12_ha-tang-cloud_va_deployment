@@ -5,8 +5,12 @@ import os
 import time
 
 from fastapi import FastAPI
+from pydantic import BaseModel
 import uvicorn
 from utils.mock_llm import ask
+
+class AskRequest(BaseModel):
+    question: str
 
 app = FastAPI(title="Agent Basic Docker")
 START_TIME = time.time()
@@ -18,8 +22,8 @@ def root():
 
 
 @app.post("/ask")
-async def ask_agent(question: str):
-    return {"answer": ask(question)}
+async def ask_agent(request: AskRequest):
+    return {"answer": ask(request.question)}
 
 
 @app.get("/health")
